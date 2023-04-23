@@ -13,5 +13,12 @@ WORKDIR /code
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
+# Copy entrypoint.sh
+COPY ./entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
 # Copy project
 COPY . .
+
+# run entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
