@@ -1,4 +1,5 @@
 # from django.contrib.auth.models import User
+from PIL.ExifTags import TAGS
 from ckeditor.fields import RichTextField
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -7,6 +8,8 @@ from django.template.defaultfilters import slugify
 from django.urls import reverse
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
+import json
+from PIL import Image as PilImage, TiffImagePlugin
 
 
 class Category(MPTTModel):
@@ -113,13 +116,39 @@ def image_upload_directory(instance, filename):
     return f'articles/{instance.post.author}/{instance.post.slug}/{filename}'
 
 
+# TODO add validator
 class Image(models.Model):
     name = models.CharField(max_length=50, default='')  # alt
     post = models.ForeignKey(Post, related_name='images', on_delete=models.SET_NULL, null=True)
     image = models.ImageField(upload_to=image_upload_directory)
+    exif_data = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.name} - {self.image}'
+
+    def save(self, *args, **kwargs):
+        # Get the exif data from the uploaded image
+        # https://github.com/python-pillow/Pillow/issues/6199
+        try:
+            import PIL.ExifTags
+            dct = {}
+            pil_image = PilImage.open(self.image)
+            exif_data = pil_image.getexif()
+            for k, v in exif_data.items():
+                if k in PIL.ExifTags.TAGS:
+                    if isinstance(v, TiffImagePlugin.IFDRational):
+                        v = float(v)
+                    elif isinstance(v, tuple):
+                        v = tuple(float(t) if isinstance(t, TiffImagePlugin.IFDRational) else t for t in v)
+                    elif isinstance(v, bytes):
+                        v = v.decode(errors="replace")
+                    dct[PIL.ExifTags.TAGS[k]] = v
+            self.exif_data = json.dumps(dct)
+        except (AttributeError, TypeError, OSError, ValueError) as e:
+            # Log error and continue without exif_data
+            print(f"Error getting exif data for {self.image}: {e}")
+
+        super().save(*args, **kwargs)
 
 
 class Video(models.Model):

@@ -3,6 +3,7 @@ from django.views.generic import ListView, DetailView, CreateView
 from django.views.generic.base import TemplateView
 from .models import Category
 
+
 class HomeView(TemplateView):
     template_name = 'home.html'
 
