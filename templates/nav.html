@@ -1,7 +1,8 @@
  <nav id="navbar" class="navbar">
         <ul>
           <li><a href="{% url 'home' %}" class="active">Home</a></li>
-          <li><a href="about.html">About</a></li>
+          <li><a href="{% url 'category_list' %}">Категории</a></li>
+            {% comment %}
           <li class="dropdown"><a href="#"><span>Gallery</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
               <li><a href="gallery.html">Nature</a></li>
@@ -19,7 +20,8 @@
               </li>
             </ul>
           </li>
-          <li><a href="services.html">Services</a></li>
-          <li><a href="contact.html">Contact</a></li>
+          {% endcomment %}
+{#          <li><a href="services.html">Services</a></li>#}
+{#          <li><a href="contact.html">Contact</a></li>#}
         </ul>
       </nav><!-- .navbar -->
