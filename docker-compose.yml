@@ -3,13 +3,19 @@ services:
   web:
     build: .
     container_name: photo_cloud_web
-    restart: always
+ #   restart: always
 #    command: python manage.py runserver 0.0.0.0:8000
 #    command: bash entrypoint.sh
     ports:
       - '8000:8000'
+    # use CURRENT_UID=$(id -u):$(id -g) docker-compose up -d
+    # user: ${CURRENT_UID}
+
+    user: 1000:1000
     env_file:
       - .env.dev
+    volumes:
+      - .:/code
   db:
     image: postgres:15.2-alpine
     container_name: photo_cloud_db
